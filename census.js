@@ -1,10 +1,10 @@
 module.exports = function Census(roomMemory){
   var mem = roomMemory;
-  var census = mem.census;
   if(!mem.init){
     init(mem);
   }
 
+  var census = mem.census;
   if(Game.time - census.lastClean >= 10){
     cleanCensus();
   }
