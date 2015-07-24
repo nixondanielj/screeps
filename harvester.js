@@ -34,18 +34,23 @@ function setTarget(creep){
 }
 
 function getTargetSource(room){
-    // if room's memory for sources is empty, set it
-    if(!room.memory.sources || !room.memory.sources.length){
-        room.memory.sources = room.find(FIND_SOURCES).map(function(source){
-            return { id: source.id, creeps: [] };
-        });
-    }
+  // if room's memory for sources is empty, set it
+  if(!room.memory.sources || !room.memory.sources.length){
+    room.memory.sources = room.find(FIND_SOURCES).map(function(source){
+      return { id: source.id, creeps: [] };
+    });
+  }
 
-    // find next source with less than n creeps
-    for(var i = 0; i < room.memory.sources.length; i++) {
-        var source = room.memory.sources[i];
-        if(source.creeps.length < config.MAX_HARVESTERS_PER_SOURCE){
-            return source;
-        }
+  // find next source with less than n creeps
+  for(var i = 0; i < room.memory.sources.length; i++) {
+    var source = room.memory.sources[i];
+    for(var j = 0; j < source.creeps.length; j++) {
+      if(!Game.getObjectById(source.creeps[j])){
+        source.creeps.splice(j, 1);
+      }
     }
+    if(source.creeps.length < config.MAX_HARVESTERS_PER_SOURCE){
+      return source;
+    }
+  }
 }
