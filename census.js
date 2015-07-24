@@ -13,8 +13,8 @@ module.exports = function Census(roomMemory){
     if(creep.memory.born){
       return;
     }
-    if(!census[creep.memory.role]){
-      census[creep.memory.role] = {};
+    if(!census.roles[creep.memory.role]){
+      census.roles[creep.memory.role] = {};
     }
     census.roles[creep.memory.role][creep.id] = Game.time;
     cleanCensus();
