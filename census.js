@@ -1,5 +1,3 @@
-var age;
-
 module.exports = function Census(roomMemory){
   var mem = roomMemory;
   var census = mem.census;
@@ -7,8 +5,7 @@ module.exports = function Census(roomMemory){
     init(mem);
   }
 
-  age = Game.time - census.age;
-  if(age >= 10){
+  if(Game.time - census.lastClean >= 10){
     cleanCensus();
   }
 
@@ -40,11 +37,10 @@ function cleanCensus(){
       }
     }
   }
-  age = 0;
 }
 
 function init(mem){
-  mem.census = { roles: {}, age: Game.time };
+  mem.census = { roles: {}, lastClean: Game.time };
   census = mem.census;
   mem.init = true;
 }
