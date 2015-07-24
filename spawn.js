@@ -24,7 +24,7 @@ module.exports = function(spawn){
   var census = new Census(spawn.room);
   var harvesters = census.getCountByRole(roles.harvester.name),
       guards = census.getCountByRole(roles.guard.name),
-      builders = census.getCountByRole(roles.builders.name);
+      builders = census.getCountByRole(roles.builder.name);
     if(harvesters < config.MIN_HARVESTERS) {
         spawn.createHarvester();
     } else if (spawn.memory.forceHarvester) {
