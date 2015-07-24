@@ -4,8 +4,4 @@ module.exports = function(creep){
         creep.moveTo(enemy);
         creep.attack(enemy);
     }
-    if(creep.getActiveBodyparts(ATTACK) === 0 && !creep.memory.kia) {
-        creep.room.memory.census[creep.role].unshift();
-        creep.memory.kia = true;
-    }
 }
