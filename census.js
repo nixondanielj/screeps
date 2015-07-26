@@ -13,11 +13,13 @@ module.exports = function Census(roomMemory){
     if(creep.memory.born){
       return;
     }
+    creep.memory.myId = creep.id;
     if(!census.roles[creep.memory.role]){
       census.roles[creep.memory.role] = {};
     }
     census.roles[creep.memory.role][creep.id] = Game.time;
     cleanCensus();
+    cleanMemory();
     creep.memory.born = true;
   };
 
@@ -37,6 +39,18 @@ function cleanCensus(){
       }
     }
   }
+}
+
+function cleanMemory(){
+  var toDel = [];
+  for(var c in Memory.creeps){
+    if(!(c in Game.creeps)){
+      toDel.push(c);
+    }
+  }
+  toDel.forEach(function(name){
+    delete Memory.creeps[name];
+  });
 }
 
 function init(mem){
