@@ -22,7 +22,7 @@ for(var prop in Game.creeps){
     switch(creep.memory.role){
       case 'builder': builder(creep); break;
       case 'guard': guard(creep); break;
-      default: harvester(creep); break;
+      case 'harvester': harvester(creep); break;
     }
   }
 }
