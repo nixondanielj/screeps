@@ -10,12 +10,11 @@ module.exports = function(creep){
     } else {
         var spawn;
         if(!creep.memory.closestSpawn){
-            spawn = creep.pos.findClosest(FIND_MY_SPAWNS) || Game.spawns.Spawn1;
+            spawn = creep.pos.findClosest(FIND_MY_SPAWNS);
             creep.memory.closestSpawn = spawn.id;
         } else {
             spawn = Game.getObjectById(creep.memory.closestSpawn);
         }
-        console.log(spawn);
         creep.moveTo(spawn);
         creep.transferEnergy(spawn);
     }
