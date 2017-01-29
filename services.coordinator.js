@@ -1,5 +1,4 @@
 var ECreep = require('enhanced-creep');
-var HarvesterStrategy = require('strategies.harvester');
 
 var normalizePriorities = (priorities) => {
     var sum = 0;
@@ -35,36 +34,36 @@ module.exports = function Coordinator() {
         var needsStaff = {};
         var unemployed = census['laborer'] || [];
         var allocatable = [];
-        for(var strategy in priorities) {
-            var target = Math.ceil(priorities[strategy] * creepCount);
-            if(!census[strategy] || !census[strategy].length) {
-                census[strategy] = [];
+        for(var role in priorities) {
+            var target = Math.ceil(priorities[role] * creepCount);
+            if(!census[role] || !census[role].length) {
+                census[role] = [];
             }
-            var current = census[strategy].length;
+            var current = census[role].length;
             var delta = current - target;
             for(var i = 0; i < delta; i++) {
                 // laborer is a catchall bucket handled separately
-                if(strategy !== 'laborer') {
+                if(role !== 'laborer') {
                     // mark surplus creeps as allocatable
-                    allocatable.push(census[strategy][i]);
+                    allocatable.push(census[role][i]);
                 }
             }
             if(delta < 0) {
                 // -delta is number of creeps needed to hit target
-                needsStaff[strategy] = -delta;
+                needsStaff[role] = -delta;
             }
         }
 
-        for(var strategy in needsStaff) {
-            var needed = needsStaff[strategy];
+        for(var role in needsStaff) {
+            var needed = needsStaff[role];
             // try staffing from unemployed first
             while(needed > 0 && unemployed.length) {
-                unemployed.splice(0, 1)[0].reallocate(strategy);
+                unemployed.splice(0, 1)[0].reallocate(role);
                 needed--;
             }
             // finally, pull staff from overstaffed priorities
             while(needed > 0 && allocatable.length) {
-                allocatable.splice(0, 1)[0].reallocate(strategy);
+                allocatable.splice(0, 1)[0].reallocate(role);
                 needed--;
             }
         }
@@ -75,16 +74,16 @@ module.exports = function Coordinator() {
         census = {};
         for(var creepName in Game.creeps) {
             var creep = new ECreep(creepName);
-            var strat = creep.getStrategy();
+            var role = creep.getRole();
             creeps[creepName] = creep;
-            if(!strat || !strat.name) {
+            if(!role || !role.name) {
                 creep.reallocate('laborer');
-                strat = creep.getStrategy();
+                role = creep.getRole();
             }
-            if(!census[strat.name]) {
-                census[strat.name] = [];
+            if(!census[role.name]) {
+                census[role.name] = [];
             }
-            census[strat.name].push(creep);
+            census[role.name].push(creep);
         }
     };
     rebuildCensus();

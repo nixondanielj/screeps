@@ -1,9 +1,9 @@
-var strategyFactory = require('factories.strategy');
+var roleFactory = require('factories.role');
 var utils = require('utils');
 
 module.exports = function ECreep(name) {
     var _creep = Game.creeps[name];
-    var _strategy = null;
+    var _role = null;
     this.memory = _creep.memory;
     this.room = _creep.room;
 
@@ -18,24 +18,24 @@ module.exports = function ECreep(name) {
         return _.sum(_creep.carry) === 0;
     }
 
-    this.reallocate = (strategy) => {
+    this.reallocate = (role) => {
         console.log('reallocating creep');
-        strategy = strategyFactory(strategy);
-        this.memory.strategy = strategy.name;
-        _strategy = strategy;
+        role = roleFactory(role);
+        this.memory.role = role.name;
+        _role = role;
         clearTask();
     };
 
-    this.getStrategy = () => {
-        if(!_strategy && this.memory.strategy) {
-            _strategy = strategyFactory(this.memory.strategy);
-            //_creep.say(_strategy.name);
+    this.getRole = () => {
+        if(!_role && this.memory.role) {
+            _role = roleFactory(this.memory.role);
+            //_creep.say(_role.name);
         }
-        return _strategy;
+        return _role;
     };
 
     this.doWork = () => {
-        var tasks = this.getStrategy().getTasks();
+        var tasks = this.getRole().getTasks();
         var task = utils.setDefault(this.memory, 'task', {});
         if((task.idx || task.idx === 0) && tasks[task.idx].run(this)) {
             return true;

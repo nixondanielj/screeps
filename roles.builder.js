@@ -11,7 +11,7 @@ var tasks = [
     new UpgradeTask()
 ];
 
-module.exports = function BuilderStrategy() {
+module.exports = function BuilderRole() {
     this.getTasks = () => tasks;
     this.name = 'builder';
 };

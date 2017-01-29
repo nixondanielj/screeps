@@ -6,7 +6,7 @@ var tasks = [
     new UpgradeTask()
 ];
 
-module.exports = function UpgraderStrategy() {
+module.exports = function UpgraderRole() {
     this.getTasks = () => tasks;
     this.name = 'upgrader';
 };

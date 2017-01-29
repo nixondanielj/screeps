@@ -10,7 +10,7 @@ var tasks = [
     new UpgradeTask()
 ];
 
-module.exports = function HarvesterStrategy() {
+module.exports = function HarvesterRole() {
     this.getTasks = () => tasks;
     this.name = 'harvester';
 };

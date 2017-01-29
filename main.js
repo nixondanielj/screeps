@@ -26,12 +26,3 @@ module.exports.loop = function () {
     }
     coordinator.doWork();
 }
-
-/*
-var coordinator = new CreepCoordinator(room);
-var priorities = {
-    harvester: 5,
-    upgrader: 3
-};
-coordinator.allocate(priorities);
-*/
