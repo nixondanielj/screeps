@@ -1,28 +1,37 @@
-// Your code goes here...
-var builder = require('builder'),
-    guard = require('guard'),
-    harvester = require('harvester'),
-    spawn = require('spawn'),
-    Census = require('census');
+var Coordinator = require('services.coordinator');
 
-for(var prop in Game.spawns){
-  if(!Game.spawns[prop].spawning){
-    spawn(Game.spawns[prop]);
-  }
+module.exports.loop = function () {
+    var spawnLimit = 11;
+    var bigBuild = [WORK, MOVE, MOVE, MOVE, CARRY, WORK, MOVE, CARRY]
+    var build = [WORK, MOVE, CARRY];
+    if(Object.keys(Game.creeps).length < spawnLimit) {
+        var spawn = Game.spawns['Spawn1'];
+        if(spawn.canCreateCreep(bigBuild) == OK) {
+            spawn.createCreep(bigBuild);
+        } else if(spawn.canCreateCreep(build) == OK) {
+            spawn.createCreep(build);
+        }
+    }
+    var coordinator = new Coordinator();
+    if(!Memory.lastReallocation) {
+        Memory.lastReallocation = 0;
+    }
+    if(Game.time - Memory.lastReallocation > 5) {
+        coordinator.reallocate({
+            harvester: 6,
+            builder: 3,
+            upgrader: 1
+        });
+        Memory.lastReallocation = Game.time;
+    }
+    coordinator.doWork();
 }
 
-for(var prop in Game.creeps){
-  var creep = Game.creeps[prop];
-  var census = new Census(creep.room);
-  if(!creep.spawning){
-    var role = creep.memory.role;
-    if(!creep.memory.born){
-      census.birth(creep);
-    }
-    switch(creep.memory.role){
-      case 'builder': builder(creep); break;
-      case 'guard': guard(creep); break;
-      case 'harvester': harvester(creep); break;
-    }
-  }
-}
+/*
+var coordinator = new CreepCoordinator(room);
+var priorities = {
+    harvester: 5,
+    upgrader: 3
+};
+coordinator.allocate(priorities);
+*/
