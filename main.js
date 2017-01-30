@@ -15,7 +15,7 @@ module.exports.loop = function () {
     var build = [MOVE, ATTACK, CARRY, MOVE, WORK, CARRY, MOVE, ATTACK, WORK, CARRY, MOVE];
     if(Object.keys(Game.creeps).length < spawnLimit) {
         var spawn = Game.spawns['Spawn1'];
-        while(spawn.canCreateCreep(build) !== OK && build.length) {
+        while(spawn.canCreateCreep(build) !== OK && build.length > 3) {
             build = build.splice(1);
         }
         if(build.length) {

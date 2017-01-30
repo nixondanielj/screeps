@@ -7,7 +7,18 @@ function StockTask() {
         }
         var target = this.getTarget(creep, 
             () => creep.findStructures([STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_CONTAINER]),
-            5, (struct) => struct.energy < struct.energyCapacity
+            5, (struct) => {
+                if(struct.energyCapacity) {
+                    return struct.energy < struct.energyCapacity;
+                } else if(struct.storeCapacity) {
+                    return _.sum(struct.store) < struct.storeCapacity;
+                }
+                return false;
+            },
+            (a, b) => {
+                var priorities = [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER];
+                return priorities.includes(b.structType) - priorities.includes(a.structType);
+            }
         );
         if(!target) {
             return false;

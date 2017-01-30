@@ -71,13 +71,16 @@ module.exports = function Coordinator() {
         for(var creepName in Game.creeps) {
             var creep = new ECreep(creepName);
             var role = creep.getRole();
-            creeps[creepName] = creep;
             if(!role || !role.name) {
                 if(!creep.tryReallocate('harvester')) {
-                    creep.tryReallocate('guard');
+                    if(!creep.tryReallocate('guard')) {
+                        console.log('unassignable creep');
+                        continue;
+                    }
                 }
                 role = creep.getRole();
             }
+            creeps[creepName] = creep;
             if(!census[role.name]) {
                 census[role.name] = [];
             }

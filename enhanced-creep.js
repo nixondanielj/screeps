@@ -94,7 +94,7 @@ module.exports = function ECreep(name) {
         var mem = this.getTaskMemory();
         if(result !== OK) {
             mem.moveErrs = (mem.moveErrs || 0) + 1;
-            if(mem.moveErrs >= 3) {
+            if(mem.moveErrs >= 5) {
                 console.log('move error failure, exploding');
                 clearTask();
             }
@@ -149,4 +149,5 @@ module.exports = function ECreep(name) {
     this.attack = (target) => _creep.attack(target);
     this.pickup = (target) => _creep.pickup(target);
     this.repair = (target) => _creep.repair(target);
+    this.suicide = () => _creep.suicide();
 };
