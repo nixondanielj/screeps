@@ -1,7 +1,17 @@
 var Coordinator = require('services.coordinator');
+var utils = require('utils');
 
 module.exports.loop = function () {
-    var spawnLimit = 11;
+    //require('tests.services.claim');
+    //require('tests.services.communicator');
+    var tower = Game.getObjectById('588e43a495d4334807315b45');
+    if(tower) {
+        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if(closestHostile) {
+            tower.attack(closestHostile);
+        }
+    }
+    var spawnLimit = 15;
     var bigBuild = [WORK, MOVE, MOVE, MOVE, CARRY, WORK, MOVE, CARRY]
     var build = [WORK, MOVE, CARRY];
     if(Object.keys(Game.creeps).length < spawnLimit) {
@@ -18,10 +28,11 @@ module.exports.loop = function () {
     }
     if(Game.time - Memory.lastReallocation > 5) {
         coordinator.reallocate({
-            harvester: 6,
-            builder: 3,
+            harvester: 10,
+            builder: 4,
             upgrader: 1
         });
+        utils.cleanMemory();
         Memory.lastReallocation = Game.time;
     }
     coordinator.doWork();

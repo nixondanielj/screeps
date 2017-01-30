@@ -23,6 +23,7 @@ module.exports = function Coordinator() {
             } catch(err) {
                 console.log('error from ' + creepName + ':');
                 console.log(err);
+                console.log(err.stack);
                 creep.clean();
             }
         }
@@ -31,9 +32,7 @@ module.exports = function Coordinator() {
     this.reallocate = (priorities) => {
         priorities = normalizePriorities(priorities);
         var creepCount = Object.keys(creeps).length;
-        var needsStaff = {};
-        var unemployed = census['laborer'] || [];
-        var allocatable = [];
+        var deltas = {};
         for(var role in priorities) {
             var target = Math.ceil(priorities[role] * creepCount);
             if(!census[role] || !census[role].length) {
@@ -41,31 +40,28 @@ module.exports = function Coordinator() {
             }
             var current = census[role].length;
             var delta = current - target;
-            for(var i = 0; i < delta; i++) {
-                // laborer is a catchall bucket handled separately
-                if(role !== 'laborer') {
-                    // mark surplus creeps as allocatable
-                    allocatable.push(census[role][i]);
-                }
-            }
-            if(delta < 0) {
-                // -delta is number of creeps needed to hit target
-                needsStaff[role] = -delta;
-            }
+            deltas[role] = delta;
         }
 
-        for(var role in needsStaff) {
-            var needed = needsStaff[role];
-            // try staffing from unemployed first
-            while(needed > 0 && unemployed.length) {
-                unemployed.splice(0, 1)[0].reallocate(role);
-                needed--;
+        for(var fromRole in deltas) {
+            var surplus = deltas[fromRole];
+            var fromPool = census[fromRole];
+            if(surplus <= 0 || !fromPool.length) continue;
+
+            for(var toRole in deltas) {
+                var needed = -deltas[toRole];
+                if(fromRole == toRole || needed <= 0) continue;
+                var idx = 0;
+                while(idx < fromPool.length && surplus > 0 && needed > 0) {
+                    if(fromPool[idx].tryReallocate(toRole)) {
+                        surplus--;
+                        needed--;
+                    }
+                    idx++;
+                }
+                deltas[toRole] = -needed;
             }
-            // finally, pull staff from overstaffed priorities
-            while(needed > 0 && allocatable.length) {
-                allocatable.splice(0, 1)[0].reallocate(role);
-                needed--;
-            }
+            deltas[fromRole] = surplus;
         }
         rebuildCensus();
     };
@@ -77,7 +73,9 @@ module.exports = function Coordinator() {
             var role = creep.getRole();
             creeps[creepName] = creep;
             if(!role || !role.name) {
-                creep.reallocate('laborer');
+                if(!creep.tryReallocate('harvester')) {
+                    creep.tryReallocate('guard');
+                }
                 role = creep.getRole();
             }
             if(!census[role.name]) {

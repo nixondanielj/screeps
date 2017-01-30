@@ -1,18 +1,23 @@
 var stateSvc = require('services.state');
+var Claim = require('models.claim');
 var utils = require('utils');
 
-const EXPIRY = 5;
-
 module.exports = function ClaimService() {
-    var claims = stateSvc.getState('claims');
 
     var cleanClaims = (key) => {
-        if(!claims[key] || !claims[key].length) {
-            claims[key] = [];
-        }
+        var claims = getResource(key);
         var tick = Game.time;
-        claims[key] = claims[key].filter(c => tick - c.refreshed < EXPIRY);
-        return claims[key];
+        for(var i = claims.length - 1; i >= 0; i--) {
+            var c = claims[i];
+            if(tick - c.refreshed > c.expiry) {
+                claims.splice(i, 1);
+            }
+        }
+        return claims;
+    };
+
+    var getResource = (rpath) => {
+        return utils.setDefault(stateSvc.getState('claims'), rpath, []);
     };
 
     this.getLeastClaimed = (resources, max=5) => {
@@ -20,7 +25,12 @@ module.exports = function ClaimService() {
         var result = null;
         for(var i = 0; i < resources.length; i++) {
             var resource = resources[i];
-            var num_claims = this.getClaims(resource.id).length;
+            var num_claims;
+            if(resource.id) {
+                num_claims = this.getClaims(resource.id).length;
+            } else {
+                num_claims = this.getClaims(resource).length;
+            }
             if(num_claims < leastClaims) {
                 leastClaims = num_claims;
                 result = resource;
@@ -29,39 +39,35 @@ module.exports = function ClaimService() {
         return result;
     };
 
-    this.addClaim = (claimant, resource) => {
-        if(claims[resource]) {
-            cleanClaims(resource)
-        } else {
-            claims[resource] = [];
-        }
-        var claim = {
-            refreshed: Game.time,
-            claimant: claimant
-        };
-        claims[resource].push(claim);
+    this.updatePayload = () => {
+        console.log('update payload noop');
+    }
+
+    this.addClaim = (claimant, resource, expiry=5) => {
+        getResource(resource).push(new Claim(claimant, expiry));
     };
 
     this.getClaims = (resource) => {
         return cleanClaims(resource);
     };
 
-    var tryRefreshClaim = (claimant, resource) => {
-        if(!claims[resource] || !claims[resource].length) {
-            return false;
-        }
-        for(var i = 0; i < claims[resource].length; i++) {
-            if(claims[resource][i].claimant === claimant) {
-                claims[resource][i].refreshed = Game.time;
+    this.refreshClaim = (claimant, resource) => {
+        var claims = getResource(resource);
+        for(var i = 0; i < claims.length; i++) {
+            if(claims[i].claimant === claimant) {
+                claims[i].refreshed = Game.time;
                 return true;
             }
         }
         return false;
     };
 
-    this.refreshClaim = (claimant, resource) => {
-        if(!tryRefreshClaim(claimant, resource)) {
-            this.addClaim(claimant, resource);
-        }
+    this.addResource = (rpath) => getResource(rpath);
+
+    this.removeResource = (rpath) => {
+        rpath = rpath.split('.');
+        var key = rpath.splice(-1);
+        var parent = getResource(rpath.join('.'));
+        delete parent[key];
     };
 }

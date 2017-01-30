@@ -1,26 +1,24 @@
-module.exports = function StockTask() {
+var BaseTask = require('tasks.base');
 
-    var getTarget = (creep) => {
-        var targets = creep.findStructures([STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_CONTAINER]);
-        targets = targets.filter(s => s.energy < s.energyCapacity);
-        if(!targets.length) {
-            return null;
-        }
-        // TODO: add prioritization
-        return targets[0];
-    };
-
+function StockTask() {
     this.run = (creep) => {
-        var acted = false;
-        if(!creep.isEmpty()) {
-            var target = getTarget(creep);
-            if(target) {
-                if(creep.xferEnergy(target) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target);
-                }
-                acted = true;
-            }
+        if(creep.isEmpty()) {
+            return false;
         }
-        return acted;
+        var target = this.getTarget(creep, 
+            () => creep.findStructures([STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_CONTAINER]),
+            5, (struct) => struct.energy < struct.energyCapacity
+        );
+        if(!target) {
+            return false;
+        }
+        if(creep.xferEnergy(target) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(target);
+        }
+        return true;
     }
 };
+
+StockTask.prototype = new BaseTask();
+
+module.exports = StockTask;
