@@ -11,14 +11,14 @@ module.exports.loop = function () {
             tower.attack(closestHostile);
         }
     }
-    var spawnLimit = 15;
-    var bigBuild = [WORK, MOVE, MOVE, MOVE, CARRY, WORK, MOVE, CARRY]
-    var build = [WORK, MOVE, CARRY];
+    var spawnLimit = 17;
+    var build = [MOVE, ATTACK, CARRY, MOVE, WORK, CARRY, MOVE, ATTACK, WORK, CARRY, MOVE];
     if(Object.keys(Game.creeps).length < spawnLimit) {
         var spawn = Game.spawns['Spawn1'];
-        if(spawn.canCreateCreep(bigBuild) == OK) {
-            spawn.createCreep(bigBuild);
-        } else if(spawn.canCreateCreep(build) == OK) {
+        while(spawn.canCreateCreep(build) !== OK && build.length) {
+            build = build.splice(1);
+        }
+        if(build.length) {
             spawn.createCreep(build);
         }
     }
@@ -29,8 +29,9 @@ module.exports.loop = function () {
     if(Game.time - Memory.lastReallocation > 5) {
         coordinator.reallocate({
             harvester: 10,
-            builder: 4,
-            upgrader: 1
+            builder: 3,
+            upgrader: 1,
+            guard: 3
         });
         utils.cleanMemory();
         Memory.lastReallocation = Game.time;

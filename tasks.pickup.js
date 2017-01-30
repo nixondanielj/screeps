@@ -31,20 +31,17 @@ function PickupTask() {
         return null;
     }
     this.run = (creep) => {
-        console.log('running pickup');
         if(!creep.isEmpty()) {
             return false;
         }
         var target = getTarget(creep);
         if(!target) {
-            console.log('no target');
             return false;
         }
         if(creep.isAdjacent(target)) {
             console.log('requesting transfer');
             comm.requestTransfer(creep.getId(), target.id);
         } else {
-            console.log('moving for pickup');
             creep.moveTo(target);
         }
         return true;

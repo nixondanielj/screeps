@@ -7,6 +7,7 @@ module.exports = function ECreep(name) {
     var _role = null;
     this.memory = _creep.memory;
     this.room = _creep.room;
+    this.name = name;
 
     this.isFull = () => {
         return _.sum(_creep.carry) == _creep.carryCapacity;
@@ -34,7 +35,6 @@ module.exports = function ECreep(name) {
     };
 
     this.isAdjacent = (target) => {
-        console.log('checking range: ' + target.id);
         return _creep.pos.inRangeTo(target, 1);
     };
 
@@ -46,7 +46,7 @@ module.exports = function ECreep(name) {
     };
 
     this.report = (message) => {
-        message = this.getRole().name + ": " + message;
+        message = message || this.getRole().name;
         _creep.say(message);
     };
 
@@ -89,6 +89,21 @@ module.exports = function ECreep(name) {
         });
     }
 
+    this.moveTo = (target) => {
+        var result = _creep.moveTo(target);
+        var mem = this.getTaskMemory();
+        if(result !== OK) {
+            mem.moveErrs = (mem.moveErrs || 0) + 1;
+            if(mem.moveErrs >= 3) {
+                console.log('move error failure, exploding');
+                clearTask();
+            }
+        } else {
+            mem.moveErrs = 0;
+        }
+        return result;
+    };
+
     this.hasActiveParts = (parts) => {
         if(!parts.length) {
             parts = [parts];
@@ -110,7 +125,11 @@ module.exports = function ECreep(name) {
         var comm = new Communicator();
         var reqs = comm.getInbox(this.getId());
         while(reqs.transfers && reqs.transfers.length) {
-            if(this.xferEnergy(reqs.transfers.pop()) === OK) {
+            console.log('responding to transfer');
+            var target = Game.getObjectById(reqs.transfers.pop());
+            if(this.xferEnergy(target) === OK) {
+                console.log('SUCCESSFUL TRANSFER');
+                comm.cancelPickup(this.getId());
                 return true;
             }
         }
@@ -119,7 +138,6 @@ module.exports = function ECreep(name) {
 
     this.clean = () => clearTask();
     this.harvest = (target) => _creep.harvest(target);
-    this.moveTo = (target) => _creep.moveTo(target);
     this.getId = () => _creep.id;
     this.upgradeController = (controller) => _creep.upgradeController(controller);
     this.findController = () => _creep.room.controller;

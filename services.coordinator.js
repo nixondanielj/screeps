@@ -83,6 +83,7 @@ module.exports = function Coordinator() {
             }
             census[role.name].push(creep);
         }
+        Memory.census = census;
     };
     rebuildCensus();
 };
